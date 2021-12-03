@@ -11,6 +11,22 @@ def getBitsByIndex(reports):
             bitsByIndex[index] += bit
     return bitsByIndex
 
+def filterReportsByBitsIndex(reports, index, mostCount, default):
+    if len(reports) == 1: return reports
+
+    filter = []
+    bitsByIndex = getBitsByIndex(reports)
+    bitsList, count = np.unique(np.array(list(bitsByIndex[index])).reshape(-1), axis=0, return_counts=True)
+
+    bitCount = bitsList[count.argmin()]
+    if mostCount == True: bitCount = bitsList[count.argmax()]
+
+    if len(count) > 1 and count[0] == count[1]: bitCount = default
+    
+    for report in reports:
+        filter.append(report[index] == bitCount)
+    return reports[filter]
+
 def step1(reports):
     epsilonRate = ''
     gammaRate = ''
@@ -34,29 +50,8 @@ def step2(reports):
     reportLength = len(reports[0])
 
     for index in range(reportLength):
-        oxygenFilter = []
-        co2Filter = []
-
-        if len(filteredOxygenRate) != 1:
-            bitsByIndex = getBitsByIndex(filteredOxygenRate)
-            bitsList, count = np.unique(np.array(list(bitsByIndex[index])).reshape(-1), axis=0, return_counts=True)
-            mostCommonBit = bitsList[count.argmax()]
-            if len(count) > 1 and count[0] == count[1]: mostCommonBit = '1'
-            
-            for report in filteredOxygenRate:
-                oxygenFilter.append(report[index] == mostCommonBit)
-            filteredOxygenRate = filteredOxygenRate[oxygenFilter]
-
-
-        if len(filteredCo2Rate) != 1:
-            bitsByIndex = getBitsByIndex(filteredCo2Rate)
-            bitsList, count = np.unique(np.array(list(bitsByIndex[index])).reshape(-1), axis=0, return_counts=True)
-            leastCommonBit = bitsList[count.argmin()]
-            if len(count) > 1 and count[0] == count[1]: leastCommonBit = '0'
-            
-            for report in filteredCo2Rate:
-                co2Filter.append(report[index] == leastCommonBit)
-            filteredCo2Rate = filteredCo2Rate[co2Filter]
+        filteredOxygenRate = filterReportsByBitsIndex(filteredOxygenRate, index, True, '1')
+        filteredCo2Rate = filterReportsByBitsIndex(filteredCo2Rate, index, False, '0')
 
     return int(filteredOxygenRate[0], 2) * int(filteredCo2Rate[0], 2)
 
