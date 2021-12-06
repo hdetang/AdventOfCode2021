@@ -1,5 +1,4 @@
 import numpy as np
-import cv2 as cv
 
 def getLines(input):
     raw = [number.replace('\n', '').replace(' ', '') for number in input]
@@ -23,7 +22,7 @@ def getLines(input):
             
     return [lines, (height, width)]
 
-def buildDiagram(lines, shape):
+def buildDiagram(lines, shape, hasDiagonal = False):
     diagram = np.zeros(shape)
 
     for coordinates in lines:
@@ -31,33 +30,33 @@ def buildDiagram(lines, shape):
         x2, y2 = coordinates[1]
 
         if (x1 == x2):
-            start, end = [y1, y2] if y1 < y2 else [y2, y1]
-            end += 1
+            start, end = [y1, y2 + 1] if y1 < y2 else [y2, y1 + 1]
             diagram[x1, start:end] = [item+1 for item in diagram[x1, start:end]]
             continue
 
         if (y1 == y2):
-            start, end = [x1, x2] if x1 < x2 else [x2, x1]
-            end += 1
+            start, end = [x1, x2 + 1] if x1 < x2 else [x2, x1 + 1]
             diagram[start:end, y1] = [item+1 for item in diagram[start:end, y1]]
             continue
+    
+        if hasDiagonal == False: continue
 
-    #cv.imshow('diagram', diagram)
-    #cv.waitKey()
+        start, end, indexY, stepY = [x1, x2 + 1, y1, 1 if y1 < y2 else -1] if x1 < x2 else [x2, x1 + 1, y2, 1 if y2 < y1 else -1]
+
+        for i in range(start, end):
+            diagram[i, indexY] += 1
+            indexY += stepY
+
     return diagram
 
-def step1(diagram):
-    overlappingLines = []
+def getCrossingLines(diagram):
     count = 0
-    for yIndex, column in enumerate(diagram):
-        for xIndex, row in enumerate(column):
+    for column in diagram:
+        for row in column:
             if row >= 2: 
                 count += 1
 
     return count
-
-def step2(diagram):
-    return 'toto'
 
 if __name__ == '__main__':
     with open('./input.txt', 'r') as file:
@@ -66,6 +65,5 @@ if __name__ == '__main__':
     lines, shape = getLines(input)
     diagram = buildDiagram(lines, shape)
 
-    print(step1(diagram))
-    print(test(lines))
-    #print(step2(deck, boards))
+    print(getCrossingLines(buildDiagram(lines, shape)))
+    print(getCrossingLines(buildDiagram(lines, shape, True)))
