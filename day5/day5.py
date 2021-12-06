@@ -1,4 +1,5 @@
 import numpy as np
+import cv2 as cv
 
 def getLines(input):
     raw = [number.replace('\n', '').replace(' ', '') for number in input]
@@ -31,12 +32,18 @@ def buildDiagram(lines, shape):
 
         if (x1 == x2):
             start, end = [y1, y2] if y1 < y2 else [y2, y1]
+            end += 1
             diagram[x1, start:end] = [item+1 for item in diagram[x1, start:end]]
+            continue
 
         if (y1 == y2):
             start, end = [x1, x2] if x1 < x2 else [x2, x1]
+            end += 1
             diagram[start:end, y1] = [item+1 for item in diagram[start:end, y1]]
+            continue
 
+    #cv.imshow('diagram', diagram)
+    #cv.waitKey()
     return diagram
 
 def step1(diagram):
@@ -46,38 +53,6 @@ def step1(diagram):
         for xIndex, row in enumerate(column):
             if row >= 2: 
                 count += 1
-                continue
-            continue
-            count += 1
-            print(row, count)
-
-            position = [xIndex, yIndex]
-            if position not in overlappingLines: overlappingLines.append(position)
-
-            nextPosition = xIndex + 1
-            while nextPosition <= 990 or diagram[nextPosition, yIndex] > 1:
-                overlappingLines.append([nextPosition, yIndex])
-                if nextPosition == 990: break
-                nextPosition += 1
-    
-            previousPosition = xIndex - 1
-            while previousPosition >= 0 or diagram[previousPosition, yIndex] > 1:
-                overlappingLines.append([previousPosition, yIndex])
-                if nextPosition == 0: break
-                nextPosition -= 1
-                
-            nextPosition = yIndex + 1
-            while nextPosition <= 990 or diagram[xIndex, nextPosition] > 1:
-                overlappingLines.append([xIndex, nextPosition])
-                if nextPosition == 990: break
-                nextPosition += 1
-    
-            previousPosition = yIndex - 1
-            while previousPosition >= 0 or diagram[xIndex, previousPosition] > 1:
-                overlappingLines.append([xIndex, previousPosition])
-                if nextPosition == 0: break
-                nextPosition -= 1
-
 
     return count
 
@@ -92,4 +67,5 @@ if __name__ == '__main__':
     diagram = buildDiagram(lines, shape)
 
     print(step1(diagram))
+    print(test(lines))
     #print(step2(deck, boards))
