@@ -1,5 +1,4 @@
 import numpy as np
-import math
 
 def getCost(positions, expensive = False):
     cheapestCost = None
