@@ -1,5 +1,3 @@
-
-
 def step1(lines, pairs):
     points = {')': 3, ']': 57, '}': 1197, '>': 25137}
     score = 0
